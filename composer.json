@@ -1,5 +1,5 @@
 {
-    "name": "uskur/pdf-label",
+    "name": "josjojo/pdf-label",
     "description": "TCPDF Class to print labels in Avery or custom formats",
     "require": {
         "tecnickcom/tcpdf": "^6.2"
@@ -7,13 +7,13 @@
     "license": "GPL-3.0-or-later",
     "authors": [
         {
-            "name": "Burak USGURLU",
-            "email": "burak@uskur.com.tr"
+            "name": "Jos Tiel Groenestege",
+            "email": "jos@tielgroenestege.com"
         }
     ],
     "autoload": {
         "psr-4": {
-            "Uskur\\PdfLabel\\": "/"
+            "josjojo\\PdfLabel\\": "/"
         }
     }
 }
