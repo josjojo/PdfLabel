@@ -7,7 +7,7 @@ namespace Uskur\PdfLabel;
  *
  * @author Burak USGURLU <burak@uskur.com.tr>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- *         
+ *
  */
 class PdfLabel extends \TCPDF
 {
@@ -69,11 +69,19 @@ class PdfLabel extends \TCPDF
     protected $labelHeight;
 
     /**
-     * Padding
+     * Padding top and bottom
      *
      * @var float
      */
-    protected $labelPadding;
+    protected $labelPaddingTopBottom;
+    
+    /**
+     * Padding left and right
+     *
+     * @var float
+     */
+    protected $labelPaddingLeftRight;
+    public $labelPadding;
 
     /**
      * Type of unit for the document
@@ -257,11 +265,13 @@ class PdfLabel extends \TCPDF
         )
     );
 
-    function Header()
-    {}
+    public function Header()
+    {
+    }
 
-    function Footer()
-    {}
+    public function Footer()
+    {
+    }
 
     /**
      *
@@ -280,8 +290,9 @@ class PdfLabel extends \TCPDF
             $Tformat = $format;
         } else {
             // Built-in format
-            if (! isset(PdfLabel::LABELS[$format]))
+            if (! isset(PdfLabel::LABELS[$format])) {
                 throw new \Exception('Unknown label format: ' . $format);
+            }
             $Tformat = PdfLabel::LABELS[$format];
         }
         
@@ -314,7 +325,13 @@ class PdfLabel extends \TCPDF
         $this->yNumber = $format['NY'];
         $this->labelWidth = $this->convertUnit($format['width'], $format['unit']);
         $this->labelHeight = $this->convertUnit($format['height'], $format['unit']);
-        $this->labelPadding = $this->convertUnit(isset($format['padding']) ? $format['padding'] : 3, 'mm');
+        if (isset($format['padding'])) {
+            $this->labelPaddingTopBottom = $this->convertUnit(isset($format['padding']) ? $format['padding'] : 3, 'mm');
+            $this->labelPaddingLeftRight = $this->convertUnit(isset($format['padding']) ? $format['padding'] : 3, 'mm');
+        } else {
+            $this->labelPaddingTopBottom = $this->convertUnit(isset($format['paddingTopBottom']) ? $format['paddingTopBottom'] : 3, 'mm');
+            $this->labelPaddingLeftRight = $this->convertUnit(isset($format['paddingLeftRight']) ? $format['paddingLeftRight'] : 3, 'mm');
+        }
         $this->cutLines = isset($format['cutLines']) ? $format['cutLines'] : false;
     }
 
@@ -344,7 +361,7 @@ class PdfLabel extends \TCPDF
      */
     public function addLabel($text)
     {
-        list ($width, $height) = $this->newLabelPosition();
+        list($width, $height) = $this->newLabelPosition();
         $this->MultiCell($width, $height, $text, 0, 'L');
     }
 
@@ -355,7 +372,7 @@ class PdfLabel extends \TCPDF
      */
     public function addHtmlLabel($html)
     {
-        list ($width, $height) = $this->newLabelPosition();
+        list($width, $height) = $this->newLabelPosition();
         $this->writeHTMLCell($width, $height, null, null, $html);
     }
     
@@ -366,7 +383,7 @@ class PdfLabel extends \TCPDF
      */
     public function addHtmlLabelWithBackground($html, $backgroundImage)
     {
-        list ($width, $height) = $this->newLabelPosition();
+        list($width, $height) = $this->newLabelPosition();
         $this->Image($backgroundImage, $this->GetX() - $this->labelPadding, $this->GetY() - $this->labelPadding, $this->labelWidth, $this->labeHeight);
         $this->writeHTMLCell($width, $height, null, null, $html);
     }
@@ -379,8 +396,9 @@ class PdfLabel extends \TCPDF
     protected function newLabelPosition()
     {
         // on a new page if enabled, draw cutlines
-        if ($this->xPosition == 0 && $this->cutLines)
+        if ($this->xPosition == 0 && $this->cutLines) {
             $this->drawCutLines();
+        }
         $this->xPosition ++;
         if ($this->xPosition == $this->xNumber) {
             // Row full, we start a new one
@@ -393,12 +411,12 @@ class PdfLabel extends \TCPDF
             }
         }
         
-        $_PosX = $this->marginLeft + $this->xPosition * ($this->labelWidth + $this->xSpace) + $this->labelPadding;
-        $_PosY = $this->marginTop + $this->yPosition * ($this->labelHeight + $this->ySpace) + $this->labelPadding;
+        $_PosX = $this->marginLeft + $this->xPosition * ($this->labelWidth + $this->xSpace) + $this->labelPaddingLeftRight;
+        $_PosY = $this->marginTop + $this->yPosition * ($this->labelHeight + $this->ySpace) + $this->labelPaddingTopBottom;
         $this->SetXY($_PosX, $_PosY);
         return [
-            $this->labelWidth - (2 * $this->labelPadding),
-            $this->labelHeight - (2 * $this->labelPadding)
+            $this->labelWidth - (2 * $this->labelPaddingLeftRight),
+            $this->labelHeight - (2 * $this->labelPaddingTopBottom)
         ];
     }
 
